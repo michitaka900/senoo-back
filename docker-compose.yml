@@ -17,9 +17,9 @@ services:
       - DB_NAME=devdb
       - DB_USER=devuser
       - DB_PASS=changeme
-      - SECRET_KEY=django-insecure-xrzhrei--crkcv122^*pz)f4s+89y(z@1m%6gbxhb(gtu36f7@
-      - AWS_ACCESS_KEY_ID=AKIA4JWZZXFCXAUQVH47
-      - AWS_SECRET_ACCESS_KEY=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
+      - SECRET_KEY=1_dc7z50pjc^@3bngh2v%2^c=e=+o7!b!=f@wau%d+kr$rm)&texi
+      - SHOPIFY_BASE_URL=https://antique-tableware.myshopify.com/admin/api/2023-01/
+      - ACCESS_TOKEN=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
 
     depends_on:
       - db
