@@ -2,17 +2,46 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import requests
 import os
+from core.eBay import get_results, get_details, get_auth_token, get_auth_code
 from .serializers import ProductSerializer, ImageSerializer
 from .models import Product, Image
 
 
+
 @api_view(['GET'])
 def getProductData(request):
-    # Product.objects.all().delete()
-    # Image.objects.all().delete
-    data = {'message': 'OK'}
-    return Response({data})
+    products = Product.objects.filter(status='active')
+    serializer = ProductSerializer(products, many=True)
+    return Response(serializer.data)
 
+@api_view(['GET'])
+def getEbayItems(request):
+    qs = request.GET.get('q', '')
+    if qs:
+        data = get_results(qs)
+        return Response(data)
+    else:
+        pass
+
+@api_view(['GET'])
+def getUserAccessToken(request):
+    response = get_auth_token()
+    print(response)
+    return Response(response)
+    # response['access_token'] #access keys as required
+    # response['error_description'] #if errors
+
+
+@api_view(['GET'])
+def getEbaySpecificItem(request):
+    itemId = request.GET.get('id', '')
+    # response = get_auth_token()
+    # token = response['access_token']
+    if itemId:
+        data = get_details(itemId)
+        return Response(data)
+    else:
+        pass
 
 @api_view(['GET'])
 def updateDB(request):
