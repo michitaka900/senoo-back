@@ -10,4 +10,6 @@ urlpatterns = [
     path('products/update', views.updateInventory, name='update_product'),
     path('products/ebay/inventory', views.checkInventory, name='check-inventory'),
     path('products/ebay/token', views.getUserAccessToken, name='ebayToken'),
+    path('products/ebay/seller', views.getSellerItems, name='seller-items'),
+
 ]

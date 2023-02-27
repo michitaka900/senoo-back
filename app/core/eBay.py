@@ -26,6 +26,15 @@ def get_results(query):
         print(e)
         print(e.response.dict())
 
+def get_seller_items():
+    try:
+        api = Finding(appid=API_KEY, config_file=None)
+        response = api.execute('findItemsAdvanced', {'sellerid': 'ace-collection'})
+        return response.dict()
+    except ConnectionError as e:
+        print(e)
+        print(e.response.dict())
+
 
 def get_details(itemId):
     try:
@@ -42,7 +51,7 @@ def get_details(itemId):
 def get_products(itemIds):
     try:
         token = get_auth_token()
-        url = f'https://open.api.ebay.com/shopping?callname=GetMultipleItems&responseencoding=JSON&siteid=0&version=1119&ItemID={itemIds}'
+        url = f'https://open.api.ebay.com/shopping?callname=GetMultipleItems&responseencoding=JSON&siteid=0&version=1119&includeselector=details&ItemID={itemIds}'
         headers = {
             "X-EBAY-API-IAF-TOKEN": token
         }

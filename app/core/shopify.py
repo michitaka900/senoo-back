@@ -1,5 +1,8 @@
 from rest_framework.response import Response
-import datetime, os, json, requests
+import datetime
+import os
+import json
+import requests
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -24,7 +27,7 @@ def getPreviousMonth():
 def get_latest_products():
     previous_month = getPreviousMonth()
     fields = ['id', 'title', 'created_at', 'updated_at',
-              'status', 'variants', 'image', 'images','vendor']
+              'status', 'variants', 'image', 'images', 'vendor']
     url = f'{BASE_URL}/products.json?limit=250&fields={",".join(fields)}&created_at_min={previous_month}'
     headers = {'Content-Type': 'application/json',
                'X-Shopify-Access-Token': ACCESS_TOKEN}
@@ -43,7 +46,6 @@ def find_shopify_products(qs):
                'X-Shopify-Access-Token': ACCESS_TOKEN}
     r = requests.get(url, headers=headers)
     products = r.json()['products']
-    print(products)
     return products
 
 
@@ -76,17 +78,23 @@ def create_product(data):
                 "price": data['price'],
                 "sku": data['title'],
                 "inventory_quantity": data['stocks'],
-                "option1": data['option1']
+                'inventory_management': 'shopify',
+                "option1": data['option1'] + "," + data['option2'],
             }]
         }
     }
     payload = json.dumps(payload)
     response = requests.post(url, headers=headers, data=payload)
+    inventory_id = response.json(
+    )['product']['variants'][0]['inventory_item_id']
+    print(inventory_id)
+    requests.post(url=f'{BASE_URL}/inventory_levels/connect.json', headers=headers,
+                  data={"location_id": 58034028696, "inventory_item_id": inventory_id})
     id = response.json()['product']['id']
     for url in data['images']:
         add_images(id, url)
-
     return response
+
 
 def update_product(data):
     url = f"{BASE_URL}/products/{data['id']}.json"
@@ -95,21 +103,31 @@ def update_product(data):
     payload = {
         "product": {
             "id": data['id'],
+            'status': data['status'],
             "variants": [{
-                "inventory_quantity": data['inventory'],
+                "barcode": data['barcode'],
                 "sku": data['sku'],
                 "price": data['price'],
-                "option1": data['option1']
+                "option1": data['option1'],
             }]
         }
     }
+    print(payload)
     payload = json.dumps(payload)
-    response = requests.put(url, headers=headers, data=payload)
-
+    requests.put(url, headers=headers, data=payload)
+    url = f"{BASE_URL}/inventory_levels/set.json"
+    payload = {
+        "location_id": 58034028696,
+        "inventory_item_id": data['inventory_id'],
+        "available": data['inventory']
+    }
+    payload = json.dumps(payload)
+    response = requests.post(url, headers=headers, data=payload)
     return response
 
+
 def get_ebay_product():
-    url = f"{BASE_URL}/products.json?product_type=eBay&status=draft&limit=250&fields=id,title,variants,image"
+    url = f"{BASE_URL}/products.json?product_type=eBay&status=draft&limit=250&fields=id,title,status,variants,quantity"
     headers = {'Content-Type': 'application/json',
                'X-Shopify-Access-Token': ACCESS_TOKEN}
     has_next = True
@@ -121,14 +139,12 @@ def get_ebay_product():
         data_list.extend(data)
         try:
             link_header = response.headers['Link']
-            if (link_header.find('next')>0 and link_header.find('previous')>0 ):
+            if (link_header.find('next') > 0 and link_header.find('previous') > 0):
                 url = link_header.split(', <')[1].split('>')[0]
-            elif link_header.find('next')>0:
-                url = link_header.replace('<','').split('>')[0]
+            elif link_header.find('next') > 0:
+                url = link_header.replace('<', '').split('>')[0]
             else:
                 has_next = False
         except:
             has_next = False
     return data_list
-
-
