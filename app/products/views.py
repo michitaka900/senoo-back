@@ -2,7 +2,6 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from core.eBay import get_results, get_details, get_auth_token, get_products, get_seller_items
 from core.shopify import get_latest_products, find_shopify_products, create_product, update_product, get_ebay_product
-import json
 
 @api_view(['GET'])
 def getProductData(request):
