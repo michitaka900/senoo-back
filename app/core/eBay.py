@@ -19,12 +19,26 @@ TOKEN = os.getenv('TOKEN')
 
 def get_results(query):
     try:
-        api = Finding(appid=API_KEY, config_file=None)
-        response = api.execute('findItemsAdvanced', {'keywords': query})
-        return response.dict()
+        if query.isnumeric():
+            response = get_details(query)
+            data = response["Item"]
+            item = {
+                "itemId": data["ItemID"],
+                "galleryURL": data["PictureDetails"]["PictureURL"][0],
+                "title": data["Title"],
+                "sellingStatus": ""
+            }
+            response_data = {"item": [item]}
+            return response_data
+        else:
+            api = Finding(appid=API_KEY, config_file=None)
+            response = api.execute('findItemsAdvanced', {'keywords': query})
+            response_data = {"item": response.dict()['searchResult']['item']}
+            return response_data
     except ConnectionError as e:
         print(e)
         print(e.response.dict())
+
 
 def get_seller_items():
     try:

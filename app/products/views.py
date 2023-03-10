@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from core.eBay import get_results, get_details, get_auth_token, get_products, get_seller_items
 from core.shopify import get_latest_products, find_shopify_products, create_product, update_product, get_ebay_product
 
+
 @api_view(['GET'])
 def getProductData(request):
     data = get_latest_products()
@@ -17,6 +18,7 @@ def findShopifyItems(request):
         return Response(data)
     else:
         pass
+
 
 @api_view(['GET'])
 def getEbayItems(request):
@@ -45,6 +47,7 @@ def createShopifyProduct(request):
 
     return Response(response.status_code)
 
+
 @api_view(['PUT'])
 def updateInventory(request):
     data = request.data
@@ -52,18 +55,18 @@ def updateInventory(request):
 
     return Response(response.status_code)
 
+
 @api_view(['GET'])
 def checkInventory(request):
     out_of_stock = []
     id_list = []
     products = get_ebay_product()
-
-    try:
-        for item in products:
-            id_list.append(item['variants'][0]['option1'].split(',')[0])
-    except:
-        pass
-
+    for item in products:
+        try:
+            if item['variants'][0]['barcode']:
+                id_list.append(item['variants'][0]['barcode'].split(',')[0])
+        except:
+            pass
     id_chunks = [id_list[i:i + 20] for i in range(0, len(id_list), 20)]
     for arr in id_chunks:
         id_strings = ','.join(arr)
@@ -72,9 +75,10 @@ def checkInventory(request):
             for item in items:
                 if item['ListingStatus'] == 'Active':
                     for p in products:
-                        ebay_id = p["variants"][0]["option1"].split(',')[0]
-                        if ebay_id == item['ItemID']:
-                            out_of_stock.append(p)
+                        if p["variants"][0]["barcode"]:
+                            ebay_id = p["variants"][0]["barcode"].split(',')[0]
+                            if ebay_id == item['ItemID']:
+                                out_of_stock.append(p)
         except:
             pass
     return Response(out_of_stock)

@@ -55,7 +55,9 @@ def add_images(id, imgUrl):
                'X-Shopify-Access-Token': ACCESS_TOKEN}
     payload = {
         "image": {
-            "src": imgUrl
+            "src": imgUrl,
+            "width": 800,
+            "height":800
         }
     }
     payload = json.dumps(payload)
@@ -79,7 +81,7 @@ def create_product(data):
                 "sku": data['title'],
                 "inventory_quantity": data['stocks'],
                 'inventory_management': 'shopify',
-                "option1": data['option1'] + "," + data['option2'],
+                "barcode": data['itemId'] + "," + data['itemUrl'],
             }]
         }
     }
@@ -108,12 +110,11 @@ def update_product(data):
                 "barcode": data['barcode'],
                 "sku": data['sku'],
                 "price": data['price'],
-                "option1": data['option1'],
+                'inventory_management': 'shopify',
             }]
         }
     }
-    print(payload)
-    payload = json.dumps(payload)
+    print(data['inventory_id'])
     requests.put(url, headers=headers, data=payload)
     url = f"{BASE_URL}/inventory_levels/set.json"
     payload = {
