@@ -1,8 +1,5 @@
-from rest_framework.response import Response
-import datetime
-import os
-import json
-import requests
+import datetime, os, io, json, requests
+from PIL import Image
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -10,6 +7,8 @@ load_dotenv()
 ACCESS_TOKEN = os.getenv('ACCESS_TOKEN')
 BASE_URL = os.getenv('SHOPIFY_BASE_URL')
 
+# os.chdir(r'')
+# path = 'images/'
 
 def getPreviousMonth():
     today = datetime.date.today()
@@ -22,7 +21,6 @@ def getPreviousMonth():
         year, month, day, 0, 0).isoformat() + '+09:00'
 
     return first_day_of_previous_month
-
 
 def get_latest_products():
     previous_month = getPreviousMonth()
@@ -56,8 +54,7 @@ def add_images(id, imgUrl):
     payload = {
         "image": {
             "src": imgUrl,
-            "width": 800,
-            "height":800
+
         }
     }
     payload = json.dumps(payload)
@@ -87,14 +84,15 @@ def create_product(data):
     }
     payload = json.dumps(payload)
     response = requests.post(url, headers=headers, data=payload)
-    inventory_id = response.json(
-    )['product']['variants'][0]['inventory_item_id']
-    print(inventory_id)
+    inventory_id = response.json()['product']['variants'][0]['inventory_item_id']
     requests.post(url=f'{BASE_URL}/inventory_levels/connect.json', headers=headers,
                   data={"location_id": 58034028696, "inventory_item_id": inventory_id})
     id = response.json()['product']['id']
-    for url in data['images']:
-        add_images(id, url)
+    for idx, url in enumerate(data['images']):
+        img_id = url.split('/z/')[1].split('/$')[0]
+        img_url = 'https://i.ebayimg.com/images/g/' + img_id +  '/s-l1600.jpg'
+        add_images(id, img_url)
+        # download_image(img_url, data['title']+str(idx))
     return response
 
 
@@ -149,3 +147,15 @@ def get_ebay_product():
         except:
             has_next = False
     return data_list
+
+
+# def download_image(url, file_name):
+#     try:
+#         image_content = requests.get(url).content
+#         image_file = io.BytesIO(image_content)
+#         image = Image.open(image_file).convert('RGB')
+#         file_path = path + file_name + '.jpg'
+#         with open(file_path, "wb") as f:
+#             image.save(f, "JPEG")
+#     except Exception as e:
+#         print('Failed: ', e)
