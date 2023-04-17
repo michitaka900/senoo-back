@@ -112,7 +112,6 @@ def update_product(data):
             }]
         }
     }
-    print(data['inventory_id'])
     requests.put(url, headers=headers, data=payload)
     url = f"{BASE_URL}/inventory_levels/set.json"
     payload = {
