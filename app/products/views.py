@@ -4,7 +4,7 @@ from rest_framework import status
 from core.eBay import get_results, get_details, get_auth_token, get_products, get_seller_items
 from core.shopify import get_latest_products, find_shopify_products, create_product, update_product, get_ebay_product
 from dotenv import load_dotenv
-import os
+import os, requests
 
 load_dotenv()
 
@@ -115,3 +115,10 @@ def check_credentials(data):
         return True
     else:
         return False
+
+@api_view(['GET'])
+def get_exchange_rate(request):
+    qs = request.GET.get('code', '')
+    res = requests.get(f'https://api.exchangerate.host/latest?base=JPY&symbols={qs}')
+    rate = res.json()["rates"]
+    return Response({"data": rate})
