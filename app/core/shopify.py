@@ -71,7 +71,7 @@ def create_product(data):
             "body_html": data['description'],
             "vendor": data['vendor'],
             "product_type": "eBay",
-            "status": "draft",
+            "status": data['status'],
             "tags": data["tags"],
             "variants": [{
                 "price": data['price'],
