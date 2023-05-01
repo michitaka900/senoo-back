@@ -11,5 +11,5 @@ urlpatterns = [
     path('products/ebay/inventory', views.checkInventory, name='check-inventory'),
     path('products/ebay/token', views.getUserAccessToken, name='ebayToken'),
     path('products/ebay/seller', views.getSellerItems, name='seller-items'),
-
+    path('user/login/', views.login_user, name='user-login'),
 ]

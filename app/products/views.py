@@ -1,8 +1,12 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework import status
 from core.eBay import get_results, get_details, get_auth_token, get_products, get_seller_items
 from core.shopify import get_latest_products, find_shopify_products, create_product, update_product, get_ebay_product
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
 
 @api_view(['GET'])
 def getProductData(request):
@@ -94,3 +98,20 @@ def getUserAccessToken(request):
 def getSellerItems(request):
     response = get_seller_items()
     return Response(response)
+
+@api_view(['POST'])
+def login_user(request):
+    data = request.data.get("data", None)
+    print(data)
+    if check_credentials(data):
+        return Response({"token": "UcT6Y2LgZXWy5ks8YTtE"})
+    else:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+def check_credentials(data):
+    LOGIN_ID = os.environ.get('LOGIN_ID')
+    LOGIN_PW = os.environ.get('LOGIN_PW')
+    if data['id'] == LOGIN_ID and data['pw'] == LOGIN_PW:
+        return True
+    else:
+        return False

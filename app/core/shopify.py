@@ -75,7 +75,7 @@ def create_product(data):
             "tags": data["tags"],
             "variants": [{
                 "price": data['price'],
-                "sku": data['title'],
+                "sku": data['sku'],
                 "inventory_quantity": data['stocks'],
                 'inventory_management': 'shopify',
                 "barcode": data['itemId'] + "," + data['itemUrl'],
